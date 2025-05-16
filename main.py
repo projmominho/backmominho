@@ -1,8 +1,6 @@
 from fastapi import FastAPI
+from cupcake import router as cupcake_router
 
 app = FastAPI()
 
-
-@app.get("/cupcake")
-def get_cupcake():
-    return {"id": 1, "nome": "Red Velvet", "preco": 12.50, "disponivel": True}
+app.include_router(cupcake_router)
