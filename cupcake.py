@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/cupcakes")
 def select_cupcakes():
     query = """
-        SELECT id, nome, descricao, preco, disponibilidade, ingredientes, peso, dimensoes, informacoesNutricionais
+        SELECT id, nome, descricao, preco, disponibilidade, ingredientes, peso, dimensoes, informacoesNutricionais, imagem
         FROM Cupcake
     """
     rows = get_rows(query)
@@ -26,6 +26,7 @@ def select_cupcakes():
                 "peso": row[6],
                 "dimensoes": row[7],
                 "informacoesNutricionais": row[8],
+                "imagem": row[9],
             }
         )
 
