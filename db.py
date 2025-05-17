@@ -1,42 +1,33 @@
 import os
-import psycopg2
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente do arquivo .env para o ambiente
-# Isso é necessário apenas localmente para evitar expor credenciais no código.
+# Carregar as variáveis de ambiente do .env (localmente)
 load_dotenv()
 
+# Monta a URL de conexão com o PostgreSQL no formato async
+DATABASE_URL = (
+    f"postgresql+asyncpg://{os.getenv('DB_USER')}:"
+    f"{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:"
+    f"{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+)
 
-def get_connection():
-    """
-    Estabelece e retorna a conexão com o banco de dados PostgreSQL.
-    As credenciais são obtidas a partir das variáveis de ambiente (.env).
-    """
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),  # Endereço do host do banco de dados
-        port=os.getenv("DB_PORT", 5432),  # Porta do banco de dados
-        dbname=os.getenv("DB_NAME"),  # Nome do banco de dados
-        user=os.getenv("DB_USER"),  # Nome de usuário para conexão
-        password=os.getenv("DB_PASSWORD"),  # Senha do banco de dados
-    )
+# Cria a engine assíncrona
+engine = create_async_engine(DATABASE_URL, echo=True)
+
+# Cria o "Base" para as classes dos models herdarem
+Base = declarative_base()
+
+# Cria um sessionmaker para gerar sessões assíncronas
+AsyncSessionLocal = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,  # Define que a session será assíncrona
+    expire_on_commit=False,
+)
 
 
-def get_rows(query, params=None):
-    """
-    Executa uma consulta SQL e retorna todas as linhas (registros) da consulta.
-    Recebe a consulta SQL como string e os parâmetros (se houver) para execução.
-    """
-    conn = get_connection()  # Estabelece a conexão com o banco
-    cur = conn.cursor()  # Cria um cursor para executar a consulta
-
-    # Executa a consulta passando os parâmetros (se houver)
-    cur.execute(query, params or ())
-
-    # Obtém todas as linhas retornadas pela consulta
-    rows = cur.fetchall()
-
-    # Fecha o cursor e a conexão com o banco de dados
-    cur.close()
-    conn.close()
-
-    return rows  # Retorna as linhas obtidas da consulta
+# fornece uma sessão com o banco para cada request (padrão do FastAPI)
+async def get_session():
+    async with AsyncSessionLocal() as session:
+        yield session
