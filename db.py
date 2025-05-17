@@ -1,4 +1,5 @@
 import os
+from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
@@ -31,3 +32,14 @@ AsyncSessionLocal = sessionmaker(
 async def get_session():
     async with AsyncSessionLocal() as session:
         yield session
+
+
+# retorna todos os resultados de um model no formato de array json
+async def fetch_all(session, model):
+    resultado = await session.execute(select(model))
+    registros = resultado.scalars().all()
+    lista = [
+        {column.name: getattr(r, column.name) for column in r.__table__.columns}
+        for r in registros
+    ]
+    return lista
