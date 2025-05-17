@@ -1,5 +1,4 @@
-from .cupcake import cupcake_router
+from .cupcake import router_cupcake
+from .vitrine import router_vitrine
 
-routers = [
-    cupcake_router,
-]
+routers = [router_cupcake, router_vitrine]

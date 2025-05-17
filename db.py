@@ -42,8 +42,12 @@ async def fetch_all(session, model):
 
 
 # converte uma lista de objetos sqlalchemy em lista de dicts/json
-def objects_to_json(registros):
-    return [
-        {column.name: getattr(r, column.name) for column in r.__table__.columns}
-        for r in registros
-    ]
+# se campos for passado, espera lista de atributos do model (ex: [Cupcake.id, Cupcake.nome]).
+def objects_to_json(registros, campos=None):
+    if campos is None:
+        return [
+            {column.name: getattr(r, column.name) for column in r.__table__.columns}
+            for r in registros
+        ]
+    nomes_campos = [campo.name for campo in campos]
+    return [{campo: getattr(r, campo) for campo in nomes_campos} for r in registros]
