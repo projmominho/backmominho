@@ -1,28 +1,11 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from create_tables import create_tables
-import os
 from dotenv import load_dotenv
-from routers import routers
-
-import asyncio
 
 load_dotenv()
 
-allowed_origins = os.getenv("CORS_ALLOWED_ORIGINS").split(",")
+from setup.create_app import create_app
+from setup.create_tables import create_tables
 
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-for router in routers:
-    app.include_router(router)
+app = create_app()
 
 
 # Rodar a criação das tabelas ao iniciar o FastAPI
