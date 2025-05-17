@@ -34,12 +34,16 @@ async def get_session():
         yield session
 
 
-# retorna todos os resultados de um model no formato de array json
+# retorna todos os resultados de um model
 async def fetch_all(session, model):
     resultado = await session.execute(select(model))
     registros = resultado.scalars().all()
-    lista = [
+    return registros
+
+
+# converte uma lista de objetos sqlalchemy em lista de dicts/json
+def objects_to_json(registros):
+    return [
         {column.name: getattr(r, column.name) for column in r.__table__.columns}
         for r in registros
     ]
-    return lista

@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from db import get_session, fetch_all
-from models.cupcake import Cupcake
+from db import get_session
+from services.loja_virtual import loja_virtual
 
 cupcake_router = APIRouter()
 
 
-# Retorna a lista de todos os cupcakes cadastrados no banco de dados.
-@cupcake_router.get("/cupcakes")
+@cupcake_router.get("/cupcake")
 async def listar_cupcakes(session: AsyncSession = Depends(get_session)):
-    return await fetch_all(session, Cupcake)
+    return await loja_virtual.exibirVitrine(session)
