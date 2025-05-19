@@ -39,7 +39,7 @@ class LojaVirtual:
 
         if cupcake is None:
             raise ServiceError(
-                payload={"message": "Cupcake não encontrado", "status_code": 404}
+                payload={"message": "bolinho não encontrado", "status_code": 404}
             )
 
         campos = [

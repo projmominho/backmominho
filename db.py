@@ -34,9 +34,9 @@ async def get_session():
         yield session
 
 
-# retorna todos os resultados de um model
+# retorna todos os resultados de uma model/tabela e ordena por id
 async def fetch_all(session, model):
-    resultado = await session.execute(select(model))
+    resultado = await session.execute(select(model).order_by(model.id))
     registros = resultado.scalars().all()
     return registros
 
