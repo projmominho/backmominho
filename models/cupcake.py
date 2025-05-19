@@ -5,8 +5,6 @@ from db import Base
 # Model Cupcake - representa a tabela cupcakes no banco de dados
 class Cupcake(Base):
     __tablename__ = "cupcake"
-
-    # Campos/atributos do cupcake
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String, nullable=False)
     descricao = Column(String)

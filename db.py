@@ -2,10 +2,6 @@ import os
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
-
-# Carregar as variáveis de ambiente do .env (localmente)
-load_dotenv()
 
 # Monta a URL de conexão com o PostgreSQL no formato async
 DATABASE_URL = (

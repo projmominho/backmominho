@@ -2,6 +2,7 @@ import asyncio
 from db import engine, Base
 
 from models.cupcake import Cupcake
+from models.pedido import Pedido, PedidoStatus, PedidoItem
 
 
 async def create_tables():
