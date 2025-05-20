@@ -57,36 +57,7 @@ class PedidoService:
                 payload={"message": "Erro ao atualizar status", "status_code": 500}
             )
 
-    # Atualiza o valor_pago do pedido (pagamento realizado)
-    async def realizar_pagamento(self, session, pedido_id, valor_pago):
-        try:
-            query = select(Pedido).where(Pedido.id == pedido_id)
-            result = await session.execute(query)
-            pedido = result.scalar_one_or_none()
-            if not pedido:
-                raise ServiceError(
-                    payload={"message": "Pedido não encontrado", "status_code": 404}
-                )
-            pedido.valor_pago = valor_pago
-            await session.commit()
-            await session.refresh(pedido)
-            return pedido
-        except SQLAlchemyError:
-            await session.rollback()
-            raise ServiceError(
-                payload={"message": "Erro ao realizar pagamento", "status_code": 500}
-            )
-
-    # Busca os dados do pedido, itens e monta o resumo para exibição.
-    async def exibir_resumo(self, pedido_id: int, session):
-        pedido = await session.get(Pedido, pedido_id)
-        print("Pedido:", pedido)
-
-        if not pedido:
-            raise ServiceError(
-                payload={"message": "Pedido não encontrado", "status_code": 500}
-            )
-
+    async def listar_itens_e_total(self, session, pedido_id):
         query = (
             select(PedidoItem, Cupcake)
             .join(Cupcake, PedidoItem.cupcake_id == Cupcake.id)
@@ -107,7 +78,24 @@ class PedidoService:
                     "subtotal": subtotal,
                 }
             )
+        return itens, valor_total
 
+    # Busca os dados do pedido, itens e monta o resumo para exibição.
+    async def exibir_resumo(self, pedido_id: int, telefone: str, session):
+        pedido = await session.get(Pedido, pedido_id)
+        if not pedido:
+            raise ServiceError(
+                payload={"message": "Pedido não encontrado", "status_code": 404}
+            )
+        if pedido.telefone != telefone:
+            raise ServiceError(
+                payload={
+                    "message": "Telefone não confere com o pedido",
+                    "status_code": 401,
+                }
+            )
+
+        itens, valor_total = await self.listar_itens_e_total(session, pedido_id)
         resumo = {
             "telefone": pedido.telefone,
             "endereco": pedido.endereco,
@@ -116,6 +104,41 @@ class PedidoService:
             "valor_total": valor_total,
         }
         return resumo
+
+    # Retorna os status do pedido em ordem cronológica
+    async def exibir_status(self, session, pedido_id, telefone):
+        pedido = await session.get(Pedido, pedido_id)
+        if not pedido:
+            raise ServiceError(
+                payload={"message": "Pedido não encontrado", "status_code": 404}
+            )
+        if pedido.telefone != telefone:
+            raise ServiceError(
+                payload={
+                    "message": "Telefone não confere com o pedido",
+                    "status_code": 401,
+                }
+            )
+        query = (
+            select(PedidoStatus)
+            .where(PedidoStatus.pedido_id == pedido_id)
+            .order_by(PedidoStatus.data_status.desc())
+        )
+        result = await session.execute(query)
+        return [
+            {"status": row.status, "data_status": row.data_status.isoformat()}
+            for row in result.scalars()
+        ]
+
+    async def atualizar_valor_pago(self, session, pedido_id, valor):
+        pedido = await session.get(Pedido, pedido_id)
+        if not pedido:
+            raise ServiceError(
+                payload={"message": "Pedido não encontrado", "status_code": 404}
+            )
+        pedido.valor_pago = valor
+        await session.commit()
+        return pedido
 
 
 pedido_service = PedidoService()
