@@ -1,7 +1,7 @@
 from services.service_error import ServiceError
 from services.pedido import pedido_service
 from models.pedido import Pedido
-from mytwilio import envia_sms
+from mytwilio import whats_pedido_atualizado
 import re
 import asyncio
 
@@ -15,7 +15,10 @@ class PagamentoService:
 
         pedido = await session.get(Pedido, pedido_id)
         mensagem = f"MOMINHO: seu pedido #{pedido_id} foi pago!"
-        envia_sms(pedido.telefone, mensagem)
+
+        whats_pedido_atualizado(
+            to=pedido.telefone, codigo_pedido=f"{pedido_id}?telefone={pedido.telefone}"
+        )
 
         status_msg = (
             f"Pagamento realizado no valor de R${valor_pago:.2f} via {tipo_pagamento}"

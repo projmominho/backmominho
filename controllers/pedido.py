@@ -4,8 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db import get_session
 from services.pedido import pedido_service
 from controllers import handle_error
-from mytwilio import envia_sms
-
+from mytwilio import whats_pedido_criado
 
 router_pedido = APIRouter()
 
@@ -20,9 +19,9 @@ async def pedido_iniciar(
         endereco = pedido_json.get("address")
         itens = pedido_json.get("cart")
         pedido = await pedido_service.novo(session, telefone, endereco, itens)
-        envia_sms(
-            to=telefone,
-            mensagem=f"MOMINHO: Pedido #{pedido.id} criado!",
+
+        whats_pedido_criado(
+            to=telefone, codigo_pedido=f"{pedido.id}?telefone={telefone}"
         )
 
         return {"message": "Pedido criado com sucesso!", "pedido_id": pedido.id}

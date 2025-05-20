@@ -7,6 +7,7 @@ TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
 TWILIO_WHATSAPP_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
 TWILIO_MESSAGE_SERVICE_SID = os.getenv("TWILIO_MESSAGE_SERVICE_SID")
 TWILIO_PEDIDO_CRIADO_TEMPLATE = os.getenv("TWILIO_PEDIDO_CRIADO_TEMPLATE")
+TWILIO_PEDIDO_ATUALIZADO_TEMPLATE = os.getenv("TWILIO_PEDIDO_ATUALIZADO_TEMPLATE")
 
 # Cria o cliente Twilio
 client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -28,6 +29,18 @@ def send_message(to: str, body: str):
 def whats_pedido_criado(to: str, codigo_pedido: str):
     message = client.messages.create(
         content_sid=TWILIO_PEDIDO_CRIADO_TEMPLATE,
+        to=f"whatsapp:+55{to}",
+        from_=TWILIO_WHATSAPP_NUMBER,
+        content_variables=json.dumps({"1": codigo_pedido}),
+        messaging_service_sid=TWILIO_MESSAGE_SERVICE_SID,
+    )
+    return message.sid
+
+
+# Envia uma mensagem via WhatsApp usando a API Twilio com template
+def whats_pedido_atualizado(to: str, codigo_pedido: str):
+    message = client.messages.create(
+        content_sid=TWILIO_PEDIDO_ATUALIZADO_TEMPLATE,
         to=f"whatsapp:+55{to}",
         from_=TWILIO_WHATSAPP_NUMBER,
         content_variables=json.dumps({"1": codigo_pedido}),
