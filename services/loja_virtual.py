@@ -56,6 +56,10 @@ class LojaVirtual:
         ]
         return objects_to_json([cupcake], campos=campos)[0]
 
+    async def atualizar_lista_cupcakes(self, session):
+        cupcakes = await fetch_all(session, Cupcake)
+        self.lista_cupcakes = cupcakes
+
 
 # cria instância única para evitar conflitos
 loja_virtual = LojaVirtual()
