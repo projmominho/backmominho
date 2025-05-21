@@ -55,3 +55,25 @@ async def admin_editar_cupcake(
         preco=data["preco"],
         disponibilidade=data["disponibilidade"],
     )
+
+
+@router_admin.post("/admin-pedidos")
+async def exibir_pedidos(
+    data: AdminConnectRequest, session: AsyncSession = Depends(get_session)
+):
+    try:
+        verificar_admin_key(data.key)
+        return await admin_service.listar_pedidos(session)
+    except Exception as e:
+        handle_error(e)
+
+
+@router_admin.put("/admin-update-status")
+async def admin_update_status(data: dict, session: AsyncSession = Depends(get_session)):
+    try:
+        verificar_admin_key(data["key"])
+        return await admin_service.atualizar_status(
+            session, pedido_id=data["id"], status=data["status"]
+        )
+    except Exception as e:
+        handle_error(e)
